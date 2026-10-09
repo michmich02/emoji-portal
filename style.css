@@ -1,0 +1,318 @@
+/* ============================================================
+   AR Gesture Canvas — Stylesheet
+   ============================================================ */
+
+/* ---------- Custom properties ---------- */
+:root {
+  --glow-cyan:   #00d4ff;
+  --glow-purple: #b44dff;
+  --glow-pink:   #ff6bb5;
+  --glass-bg:    rgba(10, 14, 30, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --font-main:   'Outfit', system-ui, sans-serif;
+}
+
+/* ---------- Reset ---------- */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  overflow: hidden;
+  background: #000;
+  font-family: var(--font-main);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+/* ---------- Webcam video (hidden, used as source) ---------- */
+#webcam {
+  position: fixed;
+  top: 0; left: 0;
+  width: 1px; height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---------- Main AR canvas ---------- */
+#arCanvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  display: block;
+}
+
+/* ---------- Loading overlay ---------- */
+#loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, #0a0e1e 0%, #000 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+#loading-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+#loading-overlay .spinner {
+  width: 48px; height: 48px;
+  border: 3px solid rgba(255,255,255,0.1);
+  border-top-color: var(--glow-cyan);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+#loading-overlay p {
+  margin-top: 18px;
+  color: rgba(255,255,255,0.6);
+  font-size: 14px;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- UI overlay ---------- */
+#ui-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+/* Status badge — top left */
+#status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 100px;
+  width: fit-content;
+}
+#status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #555;
+  transition: background 0.3s;
+}
+#status-dot.idle        { background: #555; }
+#status-dot.ready       { background: #ffaa00; box-shadow: 0 0 6px #ffaa00; }
+#status-dot.opening     { background: var(--glow-cyan); box-shadow: 0 0 8px var(--glow-cyan); }
+#status-dot.active      { background: #00ff88; box-shadow: 0 0 8px #00ff88; }
+#status-dot.closing     { background: var(--glow-pink); box-shadow: 0 0 6px var(--glow-pink); }
+#status-text {
+  color: rgba(255,255,255,0.7);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+/* Controls — top right */
+#controls {
+  position: fixed;
+  top: 20px; right: 20px;
+  display: flex;
+  gap: 10px;
+  pointer-events: auto;
+  z-index: 11;
+}
+.ctrl-btn {
+  width: 42px; height: 42px;
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: rgba(255,255,255,0.75);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+}
+.ctrl-btn:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.25);
+  color: #fff;
+  transform: translateY(-1px);
+}
+.ctrl-btn.active {
+  border-color: var(--glow-cyan);
+  color: var(--glow-cyan);
+  box-shadow: 0 0 12px rgba(0,212,255,0.25);
+}
+.ctrl-btn svg {
+  width: 20px; height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Instruction — bottom center */
+#instruction {
+  align-self: center;
+  padding: 10px 24px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 100px;
+  color: rgba(255,255,255,0.65);
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 0.4px;
+  animation: pulseInstruction 3s ease-in-out infinite;
+}
+@keyframes pulseInstruction {
+  0%, 100% { opacity: 0.8; }
+  50%      { opacity: 1; }
+}
+
+/* File input (hidden) */
+#file-input { display: none; }
+
+/* ---------- Style Selection Panel ---------- */
+#style-panel {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  width: 220px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  z-index: 12;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+  transform-origin: top right;
+  opacity: 1;
+}
+
+#style-panel:not(.open) {
+  transform: translateX(120%) scale(0.9);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+#style-panel:not(.open) .panel-header {
+  pointer-events: auto; /* keep header clickable? Actually let's use a fixed toggle button instead if we want that, or just hide entirely and use a toggle button outside. But let's assume it slides out but the toggle button is outside? No, I put the toggle button INSIDE the panel-header. If it translates off screen, it can't be clicked. Let's fix that. */
+}
+
+/* Let's make the panel slide, but the toggle button stays visible, OR put the toggle button outside */
+/* Actually, the toggle button is inside. If it slides right, let's slide by (width + 20px) but leave the toggle button? No, let's just make the toggle button absolute positioned to the left edge and sticking out. */
+#style-panel {
+  /* adjust transform to leave the button visible */
+  transform: translateX(0);
+}
+#style-panel:not(.open) {
+  transform: translateX(calc(100% + 20px));
+}
+
+/* Floating toggle button that stays outside the panel when closed */
+#toggle-panel-btn {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  width: 42px; height: 42px;
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  color: rgba(255,255,255,0.75);
+  cursor: pointer;
+  z-index: 13;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.3s ease;
+}
+#toggle-panel-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+#toggle-panel-btn svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
+#style-panel.open ~ #toggle-panel-btn {
+  /* Hide the external toggle button when panel is open */
+  opacity: 0; pointer-events: none;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.2);
+}
+
+.panel-title {
+  color: rgba(255,255,255,0.9);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+#toggle-panel {
+  background: none; border: none;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  padding: 4px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 6px;
+}
+#toggle-panel:hover { background: rgba(255,255,255,0.1); color: #fff; }
+#toggle-panel svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+.style-list {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.style-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.style-item:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+.style-item.active {
+  background: rgba(0, 212, 255, 0.1);
+  border-color: rgba(0, 212, 255, 0.3);
+}
+
+.style-item.active .style-name {
+  color: var(--glow-cyan);
+  text-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+}
+
+.style-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+}
+
+.style-name {
+  color: rgba(255,255,255,0.7);
+  font-size: 13px;
+  font-weight: 400;
+  transition: all 0.2s;
+}
