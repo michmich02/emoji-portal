@@ -1,10 +1,22 @@
 # Emoji Portal
 
-A browser-based interactive creative coding experiment by Michelle Guan.
+> Gesture-driven expressions and anime effects in the browser.
 
-## Live demo
+[**View live demo →**](https://michmich02.github.io/emoji-portal/)
 
-https://michmich02.github.io/emoji-portal/
+## Overview
+
+Emoji Portal turns hand movement into a playful visual language. The experience combines live camera input, gesture recognition, animated emoji, and layered effects in a compact browser prototype.
+
+## Interaction
+
+- Allow camera access.
+- Keep one hand visible in good lighting.
+- Move and change gestures to shift the on-screen expression and effects.
+
+## Built with
+
+`JavaScript` · `MediaPipe` · `Canvas` · `CSS`
 
 ## Run locally
 
@@ -12,14 +24,10 @@ https://michmich02.github.io/emoji-portal/
 python3 -m http.server 8000 --directory docs
 ```
 
-Open http://localhost:8000. Camera access requires localhost or HTTPS. Use a desktop browser and good lighting; allow camera or microphone access when the experience asks for it. External models and CDN scripts require internet access.
+Open [http://localhost:8000](http://localhost:8000) in a desktop browser. Camera and microphone APIs require localhost or HTTPS; external models and CDN dependencies require an internet connection.
 
-## Files
+## Design notes
 
-The root contains the project source. `docs/` contains the prepared static demo.
-
-## Publishing
-
-Enable GitHub Pages with **Deploy from a branch**, branch **main**, folder **/docs**.
-
-Camera, microphone and gesture behavior should be verified on the target device.
+- Immediate visual feedback keeps the gesture-to-effect relationship legible.
+- The experience is designed as a focused, full-screen interaction.
+- Processing happens in the browser; camera and microphone streams are not uploaded by this project.
